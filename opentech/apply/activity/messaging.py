@@ -125,6 +125,7 @@ class ActivityAdapter(AdapterBase):
         MESSAGES.DETERMINATION_OUTCOME: 'Sent a determination. Outcome: {determination.clean_outcome}',
         MESSAGES.INVITED_TO_PROPOSAL: 'Invited to submit a proposal',
         MESSAGES.REVIEWERS_UPDATED: 'reviewers_updated',
+        MESSAGES.PARTNERS_UPDATED: 'partners_updated',
         MESSAGES.NEW_REVIEW: 'Submitted a review',
         MESSAGES.OPENED_SEALED: 'Opened the submission while still sealed',
     }
@@ -133,13 +134,25 @@ class ActivityAdapter(AdapterBase):
         return [None]
 
     def extra_kwargs(self, message_type, **kwargs):
-        if message_type in [MESSAGES.OPENED_SEALED, MESSAGES.REVIEWERS_UPDATED]:
+        if message_type in [MESSAGES.OPENED_SEALED, MESSAGES.REVIEWERS_UPDATED, MESSAGES.PARTNERS_UPDATED]:
             from .models import INTERNAL
             return {'visibility': INTERNAL}
         return {}
 
     def reviewers_updated(self, added, removed, **kwargs):
         message = ['Reviewers updated.']
+        if added:
+            message.append('Added:')
+            message.append(', '.join([str(user) for user in added]) + '.')
+
+        if removed:
+            message.append('Removed:')
+            message.append(', '.join([str(user) for user in removed]) + '.')
+
+        return ' '.join(message)
+
+    def partners_updated(self, added, removed, **kwargs):
+        message = ['Partners updated.']
         if added:
             message.append('Added:')
             message.append(', '.join([str(user) for user in added]) + '.')
@@ -179,6 +192,7 @@ class SlackAdapter(AdapterBase):
         MESSAGES.EDIT: '{user} has edited <{link}|{submission.title}>',
         MESSAGES.APPLICANT_EDIT: '{user} has edited <{link}|{submission.title}>',
         MESSAGES.REVIEWERS_UPDATED: '{user} has updated the reviewers on <{link}|{submission.title}>',
+        MESSAGES.PARTNERS_UPDATED: '{user} has updated the partners on <{link}|{submission.title}>',
         MESSAGES.TRANSITION: '{user} has updated the status of <{link}|{submission.title}>: {old_phase.display_name} → {submission.phase}',
         MESSAGES.DETERMINATION_OUTCOME: 'A determination for <{link}|{submission.title}> was sent by email. Outcome: {determination.clean_outcome}',
         MESSAGES.PROPOSAL_SUBMITTED: 'A proposal has been submitted for review: <{link}|{submission.title}>',
