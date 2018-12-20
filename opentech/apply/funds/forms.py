@@ -85,3 +85,23 @@ class UpdateReviewersForm(forms.ModelForm):
             self.submitted_reviewers
         )
         return instance
+
+
+class UpdatePartnersForm(forms.ModelForm):
+    partner_reviewers = forms.ModelMultipleChoiceField(
+        queryset=User.objects.partners(),
+        widget=Select2MultiCheckboxesWidget(attrs={'data-placeholder': 'Partners'}),
+        label='Partners',
+        required=False,
+    )
+
+    class Meta:
+        model = ApplicationSubmission
+        fields: list = []
+
+    def __init__(self, *args, **kwargs):
+        kwargs.pop('user')
+        super().__init__(*args, **kwargs)
+        partners = self.instance.partners.all()
+        partner_field = self.fields['partner_reviewers']
+        partner_field.initial = partners

@@ -27,7 +27,7 @@ from opentech.apply.users.decorators import staff_required
 from opentech.apply.utils.views import DelegateableView, ViewDispatcher
 
 from .differ import compare
-from .forms import ProgressSubmissionForm, UpdateReviewersForm, UpdateSubmissionLeadForm
+from .forms import ProgressSubmissionForm, UpdateReviewersForm, UpdateSubmissionLeadForm, UpdatePartnersForm
 from .models import ApplicationSubmission, ApplicationRevision
 from .tables import AdminSubmissionsTable, SubmissionFilter, SubmissionFilterAndSearch
 from .workflow import STAGE_CHANGE_ACTIONS
@@ -124,6 +124,31 @@ class UpdateReviewersView(DelegatedViewMixin, UpdateView):
 
         messenger(
             MESSAGES.REVIEWERS_UPDATED,
+            request=self.request,
+            user=self.request.user,
+            submission=self.kwargs['submission'],
+            added=added,
+            removed=removed,
+        )
+        return response
+
+
+@method_decorator(staff_required, name='dispatch')
+class UpdatePartnersView(DelegatedViewMixin, UpdateView):
+    model = ApplicationSubmission
+    form_class = UpdatePartnersForm
+    context_name = 'partner_form'
+
+    def form_valid(self, form):
+        old_partners = set(self.get_object().partners.all())
+        response = super().form_valid(form)
+        new_partners = set(form.instance.partners.all())
+
+        added = new_partners - old_partners
+        removed = old_partners - new_partners
+
+        messenger(
+            MESSAGES.PARTNERS_UPDATED,
             request=self.request,
             user=self.request.user,
             submission=self.kwargs['submission'],
