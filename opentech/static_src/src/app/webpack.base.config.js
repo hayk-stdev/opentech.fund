@@ -1,4 +1,4 @@
-var path = require('path');
+var path = require("path")
 
 module.exports = {
     context: __dirname,
@@ -6,7 +6,7 @@ module.exports = {
     entry: ['./src/index'],
 
     output: {
-        filename: '[name]-[hash].js'
+        filename: "[name]-[hash].js"
     },
 
     plugins: [
@@ -19,7 +19,7 @@ module.exports = {
                 loader: 'babel-loader',
                 include: [path.resolve(__dirname, './src')],
                 query: {
-                    presets: ['@babel/preset-react', '@babel/preset-env'],
+                    presets: ['@babel/preset-react'],
                     plugins: [
                         'react-hot-loader/babel',
                         '@babel/plugin-proposal-class-properties'
@@ -28,33 +28,17 @@ module.exports = {
             },
             {
                 test: /\.scss$/,
-                use: [{
-                    loader: 'style-loader'
-                }, {
-                    loader: 'css-loader',
-                    options: {
-                        sourceMap: true
-                    }
-                }, {
-                    loader: 'sass-loader',
-                    options: {
-                        sourceMap: true,
-                        data: '@import "main.scss";',
-                        includePaths: [
-                            path.join(__dirname, 'src')
-                        ]
-                    }
-                }]
-            },
-            {
-                test: /\.svg$/,
-                use: ['@svgr/webpack']
+                use: [
+                    'style-loader',
+                    'css-loader',
+                    'sass-loader'
+                ]
             }
         ]
     },
 
     resolve: {
-        modules: ['node_modules', './src'],
+        modules: ['node_modules'],
         extensions: ['.js', '.jsx']
-    }
-};
+    },
+}

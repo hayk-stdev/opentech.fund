@@ -34,14 +34,14 @@ class SubmissionsTable(tables.Table):
     submit_time = tables.DateColumn(verbose_name="Submitted")
     phase = tables.Column(verbose_name="Status", order_by=('status',))
     stage = tables.Column(verbose_name="Type", order_by=('status',))
-    fund = tables.Column(verbose_name="Fund", accessor='page')
+    page = tables.Column(verbose_name="Fund")
     comments = tables.Column(accessor='comment_count', verbose_name="Comments")
     last_update = tables.DateColumn(accessor="last_update", verbose_name="Last updated")
 
     class Meta:
         model = ApplicationSubmission
         order_by = ('-last_update',)
-        fields = ('title', 'phase', 'stage', 'fund', 'round', 'submit_time', 'last_update')
+        fields = ('title', 'phase', 'stage', 'page', 'round', 'submit_time', 'last_update')
         sequence = fields + ('comments',)
         template_name = 'funds/tables/table.html'
         row_attrs = {
@@ -69,7 +69,7 @@ class AdminSubmissionsTable(SubmissionsTable):
     reviews_stats = tables.TemplateColumn(template_name='funds/tables/column_reviews.html', verbose_name=mark_safe("Reviews\n<span>Assgn.\tComp.</span>"), orderable=False)
 
     class Meta(SubmissionsTable.Meta):
-        fields = ('title', 'phase', 'stage', 'fund', 'round', 'lead', 'submit_time', 'last_update', 'reviews_stats')  # type: ignore
+        fields = ('title', 'phase', 'stage', 'page', 'round', 'lead', 'submit_time', 'last_update', 'reviews_stats')  # type: ignore
         sequence = fields + ('comments',)
 
     def render_lead(self, value):
@@ -129,23 +129,14 @@ class StatusMultipleChoiceFilter(Select2MultipleChoiceFilter):
 
 class SubmissionFilter(filters.FilterSet):
     round = Select2ModelMultipleChoiceFilter(queryset=get_used_rounds, label='Rounds')
-    fund = Select2ModelMultipleChoiceFilter(name='page', queryset=get_used_funds, label='Funds')
+    funds = Select2ModelMultipleChoiceFilter(name='page', queryset=get_used_funds, label='Funds')
     status = StatusMultipleChoiceFilter()
     lead = Select2ModelMultipleChoiceFilter(queryset=get_round_leads, label='Leads')
     reviewers = Select2ModelMultipleChoiceFilter(queryset=get_reviewers, label='Reviewers')
 
     class Meta:
         model = ApplicationSubmission
-        fields = ('fund', 'round', 'status')
-
-    def __init__(self, *args, exclude=list(), **kwargs):
-        super().__init__(*args, **kwargs)
-
-        self.filters = {
-            field: filter
-            for field, filter in self.filters.items()
-            if field not in exclude
-        }
+        fields = ('funds', 'round', 'status')
 
 
 class SubmissionFilterAndSearch(SubmissionFilter):

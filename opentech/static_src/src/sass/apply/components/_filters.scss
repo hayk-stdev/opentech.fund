@@ -1,7 +1,11 @@
 .filters {
     display: none;
 
-    .filters-open & {
+    @include media-query(tablet-landscape) {
+        display: block;
+    }
+
+    &.is-open {
         position: fixed;
         top: 0;
         right: 0;
@@ -12,24 +16,6 @@
         width: 100%;
         height: 100vh;
         background: $color--white;
-    }
-
-    @include media-query(tablet-landscape) {
-        display: block;
-        max-height: 0;
-        transition: max-height $medium-transition;
-        transition-delay: $base-delay;
-
-        .filters-open & {
-            position: relative;
-            top: auto;
-            left: auto;
-            right: auto;
-            bottom: auto;
-            height: auto;
-            background: transparent;
-            max-height: 85px;
-        }
     }
 
     &__header {
@@ -49,13 +35,5 @@
                 cursor: pointer;
             }
         }
-    }
-
-    &__button {
-        appearance: none;
-        -webkit-appearance: none; // sass-lint:disable-line no-vendor-prefixes
-        border: 0;
-        color: $color--primary;
-        background: transparent;
     }
 }
